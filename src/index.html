@@ -310,6 +310,7 @@
           let pendingOfferChange = null;
           const onOfferChange = async (value) => {
             this.connectionError = '';
+            this.qrScanError = '';
             console.info('offerInput changed:', value);
             if (offerChangeInProgress) {
               pendingOfferChange = value;
@@ -609,7 +610,12 @@
 
             // Request camera access
             const stream = await navigator.mediaDevices.getUserMedia({
-              video: { facingMode: 'environment' } // Use back camera if available
+              video: {
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                frameRate: { ideal: 30 }
+              }
             });
 
             this.qrVideoStream = stream;
@@ -654,12 +660,16 @@
           }
 
           const context = canvas.getContext('2d');
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
 
-          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const scanWidth = Math.min(video.videoWidth, 640);
+          const scanHeight = Math.min(video.videoHeight, 480);
 
-          const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+          canvas.width = scanWidth;
+          canvas.height = scanHeight;
+
+          context.drawImage(video, 0, 0, scanWidth, scanHeight);
+
+          const imageData = context.getImageData(0, 0, scanWidth, scanHeight);
           const code = window.jsQR(imageData.data, imageData.width, imageData.height);
 
           if (code) {
