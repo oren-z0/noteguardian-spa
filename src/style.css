@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+/* Custom CSS can go here */
+/**
+ * Show a "finger" cursor (hand) when hovering over non-disabled buttons.
+ * This applies to all <button> elements that are not disabled.
+ */
+button:not(:disabled):hover {
+  cursor: pointer;
+}
+
+button:disabled,
+button[disabled] {
+  cursor: not-allowed;
+}
+
+input:read-only {
+  background-color: #f0f0f0;
+}

@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Note Guardian</title>
+  <link rel="icon" type="image/png" href="data:image/png;base64,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" />
+  <script type="module" src="./main.js"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+  <div x-data="signerApp()" class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold">Note Guardian</h1>
+      <div class="flex flex-row items-center justify-center gap-2">
+        <p class="text-sm">Version <span x-text="appVersion"></span></p>
+        |
+        <a href="https://github.com/orenz0/note-guardian" target="_blank" class="text-sm text-blue-200 hover:underline">Source</a>
+      </div>
+      <div class="mt-4">
+        We encourage you to run this single-page app locally!
+        <a
+          href="#"
+          class="text-blue-200 hover:underline"
+          @click.prevent="downloadSinglePageApplication()"
+        >Download here</a>.
+      </div>
+    </div>
+
+    <!-- Connection Form -->
+    <div class="max-w-2xl mx-auto">
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-2">nsec key</label>
+        <input
+          type="password"
+          x-model="nsecKey"
+          placeholder="nsec1..."
+          class="w-full px-3 py-2 bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
+        />
+        <p class="text-red-500 text-sm" x-text="nsecKeyError" x-show="nsecKeyError"></p>
+      </div>
+
+      <div x-show="connected" class="bg-gray-800 rounded-lg p-6 mb-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-semibold">Connected</h2>
+          </div>
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center">
+              <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+              <span class="text-sm">Online</span>
+            </div>
+            <button
+              @click="disconnect"
+              class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm transition-colors"
+            >
+              Disconnect
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div x-show="!connected" class="mb-6">
+        <label class="block text-sm font-medium mb-2">Offer SDP - Copy from your computer extension</label>
+        <textarea
+          type="text"
+          x-model="offerInput"
+          placeholder="Paste Offer SDP here"
+          class="w-full px-3 py-2 bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-32"
+          required
+        ></textarea>
+      </div>
+
+      <div class="mb-4" x-show="answerSdp && !connected">
+        <label class="block text-sm font-medium mb-2">Answer SDP - Copy this back to your computer</label>
+        <div class="bg-gray-700 rounded-md p-4 text-center">
+          <canvas x-ref="qrCanvas" class="mx-auto mb-3"></canvas>
+          <button
+            x-show="Boolean(navigator.clipboard)"
+            @click="copyAnswerSdp"
+            class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md font-medium transition-colors"
+            x-text="copiedFlag ? 'Copied' : 'Copy'"
+            :disabled="copiedFlag"
+          ></button>
+          <textarea
+            x-show="!Boolean(navigator.clipboard)"
+            x-model="answerSdp"
+            class="w-full px-3 py-2 bg-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none text-sm"
+            readonly
+            @focus="$event.target.select()"
+          ></textarea>
+        </div>
+      </div>
+
+      <div x-show="!connected && connectionError" class="mt-4 p-3 bg-red-900 border border-red-700 rounded-md">
+        <p class="text-sm break-all" x-text="connectionError"></p>
+      </div>
+
+      <div x-show="connected" class="space-y-4">
+        <template x-for="request in pendingRequests" :key="request.id">
+          <div class="bg-gray-800 rounded-lg p-6 border-l-4 border-yellow-500">
+            <div class="flex items-start justify-between mb-4">
+              <div>
+                <h3 class="text-lg font-semibold capitalize" x-text="requestTypes.get(request.type) || request.type"></h3>
+                <p class="text-gray-400 text-sm" x-text="new Date(request.timestamp).toLocaleTimeString()"></p>
+              </div>
+              <div class="px-3 py-1 bg-yellow-900 text-yellow-300 rounded-full text-xs font-medium">
+                Pending
+              </div>
+            </div>
+
+            <!-- Request Details -->
+            <div class="mb-4 p-3 bg-gray-700 rounded text-sm font-mono break-all">
+              <div>
+                <pre class="break-all whitespace-pre-wrap" x-text="JSON.stringify(request.params, null, 2)"></pre>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex space-x-3">
+              <button
+                @click="approveRequest(request)"
+                class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-medium transition-colors"
+              >
+                Approve
+              </button>
+              <button
+                @click="rejectRequest(request)"
+                class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-medium transition-colors"
+              >
+                Reject
+              </button>
+            </div>
+          </div>
+        </template>
+
+        <!-- No Pending Requests -->
+        <div x-show="pendingRequests.length === 0" class="text-center py-12 text-gray-400">
+          <p>No pending requests. Waiting for signing requests from your computer...</p>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div x-show="connected && recentActivity.length > 0" class="mt-8">
+        <div class="flex flex-row items-center justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
+          </div>
+          <div>
+            <button @click="clearRecentActivity" class="text-sm text-gray-400">Clear</button>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <template x-for="activity in recentActivity.slice(0, 5)" :key="activity.id">
+            <div class="bg-gray-800 rounded p-3 flex items-center justify-between">
+              <div class="flex items-center">
+                <div
+                  class="w-3 h-3 rounded-full mr-3"
+                  :class="activity.status === 'approved' ? 'bg-green-500' : 'bg-red-500'"
+                ></div>
+                <span x-text="requestTypes.get(activity.type) || activity.type"></span>
+                <span x-show="activity.kind !== undefined" class="text-gray-400 text-xs ml-3" x-text="`(${activity.kind})`"></span>
+              </div>
+              <div class="text-sm text-gray-400">
+                <span x-text="activity.status"></span>
+                <span x-text="new Date(activity.timestamp).toLocaleTimeString()"></span>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const requestTypes = new Map([
+      ['getPublicKey', 'Get Public Key'],
+      ['signEvent', 'Sign Event'],
+      ['nip04.encrypt', 'NIP-04 Encrypt Message'],
+      ['nip04.decrypt', 'NIP-04 Decrypt Message'],
+      ['nip44.encrypt', 'NIP-44 Encrypt Message'],
+      ['nip44.decrypt', 'NIP-44 Decrypt Message'],
+    ]);
+
+    const secretsCache = new Map()
+
+    function getSharedSecret(sk, peer) {
+      // Detect a key change and erase the cache if they changed their key
+      if (previousSk !== sk) {
+        secretsCache.clear()
+      }
+
+      let key = secretsCache.get(peer)
+
+      if (!key) {
+        key = window.NostrTools.nip44.v2.utils.getConversationKey(sk, peer)
+        secretsCache.set(peer, key)
+      }
+
+      return key
+    }
+
+    function decodeSdp(value) {
+      if (value.indexOf('\n') >= 0) {
+        // already decoded
+        return value;
+      }
+      const trimmed = value.trim()
+      const hashIndex = trimmed.indexOf('#')
+      if (hashIndex < 0) {
+        return decodeURIComponent(trimmed)
+      }
+      const params = trimmed.slice(hashIndex + 1).split('&')
+      const [decodedSdp] = params.filter(param => param.startsWith('offer=')).map(param => decodeURIComponent(param.slice('offer='.length)))
+      return decodedSdp || ''
+    }
+
+    function downloadTextAsFile(text, filename, format) {
+      const blob = new Blob([text], { type: format });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+
+    async function downloadSinglePageApplication() {
+      try {
+        if (window.location.protocol === 'file:') {
+          alert('You are already running this page from your local file system.');
+          return;
+        }
+        const response = await fetch(location.href);
+        if (!response.ok) {
+          console.error('Failed to fetch the current page', response.status, response.statusText);
+          throw new Error('Failed to fetch the current page');
+        }
+        const html = await response.text();
+        await downloadTextAsFile(html, `noteguardian-v${window.appVersion}.html`, 'text/html');
+      } catch (error) {
+        console.error('Failed to download the single page application', error);
+        if (navigator.onLine) {
+          alert('Failed to download the single page application. Please try again.');
+        } else {
+          alert('You are offline. Please check your internet connection and try again.');
+        }
+      }
+    }
+
+    function signerApp() {
+      const offerInput = window.location.hash ? decodeSdp(window.location.hash) : ''
+      return {
+        appVersion: window.appVersion,
+        nsecKey: '',
+        nsecKeyError: '',
+        cachedNsecToPrivateKey: {key: '', value: ''},
+        offerInput,
+        peerConnection: null,
+        dataChannel: null,
+        answerSdp: null,
+        connected: false,
+        connectionError: '',
+        pendingRequests: [],
+        recentActivity: JSON.parse(localStorage.getItem('recentActivity') || '[]'),
+        copiedFlag: false,
+
+        init() {
+          let offerChangeInProgress = false;
+          let pendingOfferChange = null;
+          const onOfferChange = async (value) => {
+            this.connectionError = '';
+            console.info('offerInput changed:', value);
+            if (offerChangeInProgress) {
+              pendingOfferChange = value;
+              return;
+            }
+            offerChangeInProgress = true;
+            try {
+              if (this.peerConnection) {
+                try {
+                  this.peerConnection.close();
+                } catch (error) {
+                  console.info('Failed to close peer connection', error);
+                }
+                this.peerConnection = null;
+                try {
+                  this.dataChannel.close();
+                } catch (error) {
+                  console.info('Failed to close data channel', error);
+                }
+                this.dataChannel = null;
+                this.answerSdp = null;
+              }
+              const offerSdp = decodeSdp(value);
+              if (!offerSdp) {
+                return
+              }
+              const peerConnection = new RTCPeerConnection();
+
+              try {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription({
+                  type: 'offer',
+                  sdp: offerSdp
+                }));
+              } catch (error) {
+                console.info('Failed to set remote description, trying to add newline', error);
+                await peerConnection.setRemoteDescription(new RTCSessionDescription({
+                  type: 'offer',
+                  sdp: offerSdp + '\n'
+                }));
+              }
+              const answer = await peerConnection.createAnswer();
+              await peerConnection.setLocalDescription(answer);
+              peerConnection.onconnectionstatechange = () => {
+                if (peerConnection !== this.peerConnection) {
+                  return;
+                }
+                console.info('connection state changed', peerConnection.connectionState);
+                this.connected = (peerConnection.connectionState === 'connected');
+              }
+              peerConnection.ondatachannel = (event) => {
+                if (peerConnection !== this.peerConnection) {
+                  return;
+                }
+                const dataChannel = event.channel;
+                this.dataChannel = dataChannel;
+                console.info('Data channel received:', dataChannel.label);
+
+                dataChannel.onopen = () => {
+                  if (dataChannel !== this.dataChannel) {
+                    return;
+                  }
+                  console.info('Data channel opened');
+                };
+
+                dataChannel.onmessage = (messageEvent) => {
+                  if (dataChannel !== this.dataChannel) {
+                    return;
+                  }
+                  console.info('Message received:', messageEvent.data);
+                  try {
+                    const message = JSON.parse(messageEvent.data);
+                    this.handleMessage(message);
+                  } catch (error) {
+                    console.error('Failed to parse message:', error);
+                  }
+                };
+
+                dataChannel.onerror = (error) => {
+                  if (dataChannel !== this.dataChannel) {
+                    return;
+                  }
+                  console.error('Data channel error:', error);
+                };
+
+                dataChannel.onclose = () => {
+                  if (dataChannel !== this.dataChannel) {
+                    return;
+                  }
+                  console.info('Data channel closed');
+                };
+              };
+
+              console.info('answer', peerConnection.localDescription);
+              this.peerConnection = peerConnection;
+              this.answerSdp = this.peerConnection.localDescription.sdp;
+              console.info('Created WebRTC answer SDP:', this.answerSdp);
+            } catch (error) {
+              console.info('Invalid offer SDP', error);
+              this.connectionError = `Invalid offer SDP: ${error.message}`;
+            } finally {
+              offerChangeInProgress = false;
+              if (pendingOfferChange) {
+                void onOfferChange(pendingOfferChange);
+              }
+            }
+          }
+
+          this.$watch('offerInput', onOfferChange);
+          this.$watch('nsecKey', () => {
+            this.nsecKeyError = '';
+          });
+          void onOfferChange(this.offerInput);
+
+          // Watch for answerSdp changes to generate QR code
+          this.$watch('answerSdp', (value) => {
+            console.info('answerSdp changed:', value);
+            if (value) {
+              this.generateQRCode(value);
+            }
+          });
+        },
+
+        disconnect() {
+          if (this.peerConnection) {
+            try {
+              this.peerConnection.close();
+            } catch (error) {
+              console.error('Failed to close peer connection', error);
+            }
+            this.peerConnection = null;
+            try {
+              this.dataChannel.close();
+            } catch (error) {
+              console.error('Failed to close data channel', error);
+            }
+            this.dataChannel = null;
+            this.connected = false;
+            this.offerInput = '';
+            this.answerSdp = null;
+          }
+        },
+
+        generateQRCode(text) {
+          const canvas = this.$refs.qrCanvas;
+          if (canvas && window.QRCode) {
+            QRCode.toCanvas(canvas, text, {
+              width: 250,
+              margin: 2,
+              color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+              }
+            }, (error) => {
+              if (error) {
+                console.error('QR Code generation error:', error);
+              }
+            });
+          }
+        },
+
+        async copyAnswerSdp() {
+          if (!this.answerSdp) {
+            return;
+          }
+          try {
+            await navigator.clipboard.writeText(this.answerSdp);
+            this.copiedFlag = true;
+            setTimeout(() => {
+              this.copiedFlag = false;
+            }, 3000);
+          } catch (error) {
+            console.error('Failed to copy:', error);
+            this.connectionError = `Failed to copy: ${error.message}`;
+          }
+        },
+
+        clearRecentActivity() {
+          this.recentActivity = [];
+          localStorage.removeItem('recentActivity');
+        },
+
+        handleMessage(message) {
+          console.info('handleMessage', message);
+          this.pendingRequests.push({
+            ...message,
+            timestamp: Date.now()
+          });
+        },
+
+        async approveRequest(request) {
+          const { type, params } = request;
+          try {
+            const trimmedNsecKey = this.nsecKey.trim()
+            if (!trimmedNsecKey) {
+              this.nsecKeyError = 'Required for nostr operations!';
+              throw new Error('No nsec key provided');
+            }
+            const privateKey = this.nsecToPrivateKey(trimmedNsecKey);
+            if (!privateKey) {
+              this.nsecKeyError = 'Invalid nsec key';
+              throw new Error('Invalid nsec key');
+            }
+            let result;
+            switch (type) {
+              case 'getPublicKey': {
+                result = await window.NostrTools.getPublicKey(privateKey);
+                break;
+              }
+              case 'signEvent': {
+                const event = window.NostrTools.finalizeEvent(params.event, privateKey)
+                result = window.NostrTools.validateEvent(event) ? event : {error: {message: 'invalid event'}}
+                break;
+              }
+              case 'nip04.encrypt': {
+                const {peer, plaintext} = params
+                result = window.NostrTools.nip04.encrypt(privateKey, peer, plaintext)
+                break;
+              }
+              case 'nip04.decrypt': {
+                const {peer, ciphertext} = params
+                result = window.NostrTools.nip04.decrypt(privateKey, peer, ciphertext)
+                break;
+              }
+              case 'nip44.encrypt': {
+                const {peer, plaintext} = params
+                const key = getSharedSecret(privateKey, peer)
+                result = window.NostrTools.nip44.v2.encrypt(plaintext, key)
+                break;
+              }
+              case 'nip44.decrypt': {
+                const {peer, ciphertext} = params
+                const key = getSharedSecret(privateKey, peer)
+                result = window.NostrTools.nip44.v2.decrypt(ciphertext, key)
+                break;
+              }
+              default:
+                throw new Error('Unknown request type');
+            }
+
+            this.sendResponse(request.id, { success: true, result });
+            this.addToRecentActivity(request, 'approved');
+            this.removePendingRequest(request.id);
+
+          } catch (error) {
+            console.warn('Failed to approve request', error);
+            this.sendResponse(request.id, { success: false, error: error.message });
+            this.addToRecentActivity(request, 'error');
+            this.removePendingRequest(request.id);
+          }
+        },
+
+        rejectRequest(request) {
+          this.sendResponse(request.id, { success: false, error: 'User rejected' });
+          this.addToRecentActivity(request, 'rejected');
+          this.removePendingRequest(request.id);
+        },
+
+        sendResponse(requestId, response) {
+          if (this.peerConnection && this.dataChannel && this.dataChannel.readyState === "open") {
+            const responseMessage = {
+              type: 'response',
+              id: requestId,
+              ...response
+            };
+            console.info('Sending response', responseMessage);
+            this.dataChannel.send(JSON.stringify(responseMessage));
+          }
+        },
+
+        removePendingRequest(id) {
+          this.pendingRequests = this.pendingRequests.filter(req => req.id !== id);
+        },
+
+        addToRecentActivity(request, status) {
+          const activity = {
+            id: request.id,
+            type: request.type,
+            ...request.type === 'signEvent' && {
+              kind: request.params.event?.kind,
+            },
+            status,
+            timestamp: Date.now()
+          };
+
+          this.recentActivity.unshift(activity);
+          this.recentActivity = this.recentActivity.slice(0, 20); // Keep last 20
+          localStorage.setItem('recentActivity', JSON.stringify(this.recentActivity));
+        },
+
+        // Crypto functions
+        nsecToPrivateKey(nsec) {
+          if (nsec === this.cachedNsecToPrivateKey.key) {
+            return this.cachedNsecToPrivateKey.value;
+          }
+          const { type, data } = window.NostrTools.nip19.decode(nsec);
+          if (type !== 'nsec') {
+            return undefined;
+          };
+          this.cachedNsecToPrivateKey = { key: nsec, value: data };
+          return data;
+        },
+      };
+    }
+
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('signerApp', signerApp);
+    });
+  </script>
+</body>
+</html>

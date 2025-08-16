@@ -1,0 +1,29 @@
+{
+  "name": "noteguardian-spa",
+  "version": "0.1.0",
+  "description": "",
+  "scripts": {
+    "build": "vite build --mode production --emptyOutDir",
+    "dev": "vite --port 8080",
+    "clean": "rm -rf build dist",
+    "serve": "serve -l 8080 dist",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Oren <orenz0@protonmail.com>",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "alpinejs": "^3.14.9",
+    "nostr-tools": "^2.16.2",
+    "qrcode": "^1.5.4",
+    "tailwindcss": "^4.1.11"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.11",
+    "serve": "^14.2.4",
+    "vite": "^7.0.6",
+    "vite-plugin-node-polyfills": "^0.24.0",
+    "vite-plugin-singlefile": "^2.3.0"
+  }
+}
