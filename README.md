@@ -1,7 +1,7 @@
 # Note Guardian
 
 This web app should be opened on a secure device that holds your Nostr secret key (i.e. your phone) to allow
-a less-secure device to sign/encrypt/decrypt events, using the Note Guardian browser extension.
+a less-secure device to sign/encrypt/decrypt events, using the [Note Guardian browser extension](https://github.com/oren-z0/noteguardian-extension).
 
 Served at: https://guardian.niot.space
 
