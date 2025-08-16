@@ -452,6 +452,7 @@
               console.info('Invalid offer SDP', error);
               this.connectionError = `Invalid offer SDP: ${error.message}`;
             } finally {
+              await new Promise(resolve => setTimeout(resolve, 400));
               offerChangeInProgress = false;
               if (pendingOfferChange) {
                 void onOfferChange(pendingOfferChange);
