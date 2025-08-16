@@ -233,6 +233,21 @@
       return key
     }
 
+    function decompressOffer(compressedOfferBase64) {
+      try {
+        const compressedOffer = atob(compressedOfferBase64.replace(/\-/g, '+').replace(/_/g, '/'))
+        const compressedBytes = new Uint8Array(compressedOffer.length)
+        for (let i = 0; i < compressedOffer.length; i++) {
+          compressedBytes[i] = compressedOffer.charCodeAt(i)
+        }
+        const offerUint8Array = window.pako.inflate(compressedBytes)
+        return new TextDecoder().decode(offerUint8Array)
+      } catch (error) {
+        console.error('Failed to decompress offer:', error)
+        return ''
+      }
+    }
+
     function decodeSdp(value) {
       if (value.indexOf('\n') >= 0) {
         // already decoded
@@ -241,10 +256,10 @@
       const trimmed = value.trim()
       const hashIndex = trimmed.indexOf('#')
       if (hashIndex < 0) {
-        return decodeURIComponent(trimmed)
+        return decompressOffer(decodeURIComponent(trimmed))
       }
       const params = trimmed.slice(hashIndex + 1).split('&')
-      const [decodedSdp] = params.filter(param => param.startsWith('offer=')).map(param => decodeURIComponent(param.slice('offer='.length)))
+      const [decodedSdp] = params.filter(param => param.startsWith('offer=')).map(param => decompressOffer(decodeURIComponent(param.slice('offer='.length))))
       return decodedSdp || ''
     }
 
