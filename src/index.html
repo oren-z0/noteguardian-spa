@@ -32,12 +32,24 @@
       <div class="mb-4">
         <label class="block text-sm font-medium mb-2">nsec key</label>
         <input
+          x-show="!useBrowserExtension"
           type="password"
           x-model="nsecKey"
           placeholder="nsec1..."
           class="w-full px-3 py-2 bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
+        <p
+          x-show="useBrowserExtension"
+        >
+          <span>Browser Extension was detected and will be used to sign events.</span>
+          <button
+            @click="useBrowserExtension = false"
+            class="text-blue-200 hover:underline"
+          >
+            Enter nsec manually.
+          </button>
+        </p>
         <p class="text-red-500 text-sm" x-text="nsecKeyError" x-show="nsecKeyError"></p>
       </div>
 
@@ -70,6 +82,7 @@
             placeholder="Paste Offer SDP here"
             class="w-full px-3 py-2 bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-32"
             required
+            @focus="$event.target.select()"
           ></textarea>
           <div>
             <button
@@ -174,7 +187,7 @@
       </div>
 
       <!-- Recent Activity -->
-      <div x-show="connected && recentActivity.length > 0" class="mt-8">
+      <div x-show="recentActivity.length > 0" class="mt-8">
         <div class="flex flex-row items-center justify-between mb-4">
           <div>
             <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
@@ -216,7 +229,7 @@
     ]);
 
     const secretsCache = new Map()
-
+    let previousSk
     function getSharedSecret(sk, peer) {
       // Detect a key change and erase the cache if they changed their key
       if (previousSk !== sk) {
@@ -231,6 +244,19 @@
       }
 
       return key
+    }
+
+    let cachedNsecToPrivateKey = {key: '', value: ''}
+    function nsecToPrivateKey(nsec) {
+      if (nsec === cachedNsecToPrivateKey.key) {
+        return cachedNsecToPrivateKey.value;
+      }
+      const { type, data } = window.NostrTools.nip19.decode(nsec);
+      if (type !== 'nsec') {
+        return undefined;
+      };
+      cachedNsecToPrivateKey = { key: nsec, value: data };
+      return data;
     }
 
     function decompressOffer(compressedOfferBase64) {
@@ -303,9 +329,9 @@
       const offerInput = window.location.hash ? decodeSdp(window.location.hash) : ''
       return {
         appVersion: window.appVersion,
+        useBrowserExtension: false,
         nsecKey: '',
         nsecKeyError: '',
-        cachedNsecToPrivateKey: {key: '', value: ''},
         offerInput,
         peerConnection: null,
         dataChannel: null,
@@ -446,6 +472,19 @@
               this.generateQRCode(value);
             }
           });
+
+          let checkNostrExtensionCounter = 0
+          const checkNostrExtension = setInterval(() => {
+            if (window.nostr?.getPublicKey) {
+              this.useBrowserExtension = true;
+              clearInterval(checkNostrExtension);
+              return;
+            }
+            checkNostrExtensionCounter += 1
+            if (checkNostrExtensionCounter > 20) {
+              clearInterval(checkNostrExtension);
+            }
+          }, 100);
         },
 
         disconnect() {
@@ -520,53 +559,95 @@
         async approveRequest(request) {
           const { type, params } = request;
           try {
-            const trimmedNsecKey = this.nsecKey.trim()
-            if (!trimmedNsecKey) {
-              this.nsecKeyError = 'Required for nostr operations!';
-              throw new Error('No nsec key provided');
-            }
-            const privateKey = this.nsecToPrivateKey(trimmedNsecKey);
-            if (!privateKey) {
-              this.nsecKeyError = 'Invalid nsec key';
-              throw new Error('Invalid nsec key');
-            }
             let result;
-            switch (type) {
-              case 'getPublicKey': {
-                result = await window.NostrTools.getPublicKey(privateKey);
-                break;
+            if (this.useBrowserExtension) {
+              switch (type) {
+                case 'getPublicKey': {
+                  result = await window.nostr.getPublicKey();
+                  break;
+                }
+                case 'signEvent': {
+                  result = await window.nostr.signEvent(params.event);
+                  break;
+                }
+                case 'getRelays': {
+                  result = await window.nostr.getRelays();
+                  break;
+                }
+                case 'nip04.encrypt': {
+                  const {peer, plaintext} = params
+                  result = await window.nostr.nip04.encrypt(peer, plaintext)
+                  break;
+                }
+                case 'nip04.decrypt': {
+                  const {peer, ciphertext} = params
+                  result = await window.nostr.nip04.decrypt(peer, ciphertext)
+                  break;
+                }
+                case 'nip44.encrypt': {
+                  const {peer, plaintext} = params
+                  result = await window.nostr.nip44.encrypt(peer, plaintext)
+                  break;
+                }
+                case 'nip44.decrypt': {
+                  const {peer, ciphertext} = params
+                  result = await window.nostr.nip44.decrypt(peer, ciphertext)
+                  break;
+                }
+                default:
+                  throw new Error('Unknown request type');
               }
-              case 'signEvent': {
-                const event = window.NostrTools.finalizeEvent(params.event, privateKey)
-                result = window.NostrTools.validateEvent(event) ? event : {error: {message: 'invalid event'}}
-                break;
+            } else {
+              const trimmedNsecKey = this.nsecKey.trim()
+              if (!trimmedNsecKey) {
+                this.nsecKeyError = 'Required for nostr operations!';
+                throw new Error('No nsec key provided');
               }
-              case 'nip04.encrypt': {
-                const {peer, plaintext} = params
-                result = window.NostrTools.nip04.encrypt(privateKey, peer, plaintext)
-                break;
+              const privateKey = nsecToPrivateKey(trimmedNsecKey);
+              if (!privateKey) {
+                this.nsecKeyError = 'Invalid nsec key';
+                throw new Error('Invalid nsec key');
               }
-              case 'nip04.decrypt': {
-                const {peer, ciphertext} = params
-                result = window.NostrTools.nip04.decrypt(privateKey, peer, ciphertext)
-                break;
+              switch (type) {
+                case 'getPublicKey': {
+                  result = await window.NostrTools.getPublicKey(privateKey);
+                  break;
+                }
+                case 'signEvent': {
+                  const event = window.NostrTools.finalizeEvent(params.event, privateKey)
+                  result = window.NostrTools.validateEvent(event) ? event : {error: {message: 'invalid event'}}
+                  break;
+                }
+                case 'getRelays': {
+                  throw new Error('getRelays not implemented');
+                  break;
+                }
+                case 'nip04.encrypt': {
+                  const {peer, plaintext} = params
+                  result = window.NostrTools.nip04.encrypt(privateKey, peer, plaintext)
+                  break;
+                }
+                case 'nip04.decrypt': {
+                  const {peer, ciphertext} = params
+                  result = window.NostrTools.nip04.decrypt(privateKey, peer, ciphertext)
+                  break;
+                }
+                case 'nip44.encrypt': {
+                  const {peer, plaintext} = params
+                  const key = getSharedSecret(privateKey, peer)
+                  result = window.NostrTools.nip44.v2.encrypt(plaintext, key)
+                  break;
+                }
+                case 'nip44.decrypt': {
+                  const {peer, ciphertext} = params
+                  const key = getSharedSecret(privateKey, peer)
+                  result = window.NostrTools.nip44.v2.decrypt(ciphertext, key)
+                  break;
+                }
+                default:
+                  throw new Error('Unknown request type');
               }
-              case 'nip44.encrypt': {
-                const {peer, plaintext} = params
-                const key = getSharedSecret(privateKey, peer)
-                result = window.NostrTools.nip44.v2.encrypt(plaintext, key)
-                break;
-              }
-              case 'nip44.decrypt': {
-                const {peer, ciphertext} = params
-                const key = getSharedSecret(privateKey, peer)
-                result = window.NostrTools.nip44.v2.decrypt(ciphertext, key)
-                break;
-              }
-              default:
-                throw new Error('Unknown request type');
             }
-
             this.sendResponse(request.id, { success: true, result });
             this.addToRecentActivity(request, 'approved');
             this.removePendingRequest(request.id);
@@ -692,19 +773,6 @@
             this.offerInput = code.data;
             this.stopQRScan();
           }
-        },
-
-        // Crypto functions
-        nsecToPrivateKey(nsec) {
-          if (nsec === this.cachedNsecToPrivateKey.key) {
-            return this.cachedNsecToPrivateKey.value;
-          }
-          const { type, data } = window.NostrTools.nip19.decode(nsec);
-          if (type !== 'nsec') {
-            return undefined;
-          };
-          this.cachedNsecToPrivateKey = { key: nsec, value: data };
-          return data;
         },
       };
     }
