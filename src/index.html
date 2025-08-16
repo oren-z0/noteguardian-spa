@@ -63,13 +63,45 @@
 
       <div x-show="!connected" class="mb-6">
         <label class="block text-sm font-medium mb-2">Offer SDP - Copy from your computer extension</label>
-        <textarea
-          type="text"
-          x-model="offerInput"
-          placeholder="Paste Offer SDP here"
-          class="w-full px-3 py-2 bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-32"
-          required
-        ></textarea>
+        <div x-show="!scanningQR" class="flex flex-col justify-center items-center">
+          <textarea
+            type="text"
+            x-model="offerInput"
+            placeholder="Paste Offer SDP here"
+            class="w-full px-3 py-2 bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-32"
+            required
+          ></textarea>
+          <div>
+            <button
+              @click="startQRScan"
+              class="mt-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md font-medium transition-colors text-sm"
+            >
+              Scan QR Code
+            </button>
+          </div>
+        </div>
+        <div x-show="scanningQR" class="space-y-4">
+          <div class="relative">
+            <video
+              x-ref="qrVideo"
+              class="w-full max-w-md mx-auto bg-gray-800 rounded-md"
+              autoplay
+              playsinline
+            ></video>
+            <canvas x-ref="qrScanCanvas" class="hidden"></canvas>
+          </div>
+          <div class="flex space-x-3 justify-center">
+            <button
+              @click="stopQRScan"
+              class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-md font-medium transition-colors text-sm"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+        <div x-show="qrScanError" class="mt-4 p-3 bg-red-900 border border-red-700 rounded-md">
+          <p class="text-sm break-all" x-text="qrScanError"></p>
+        </div>
       </div>
 
       <div class="mb-4" x-show="answerSdp && !connected">
@@ -97,7 +129,7 @@
         <p class="text-sm break-all" x-text="connectionError"></p>
       </div>
 
-      <div x-show="connected" class="space-y-4">
+      <div class="space-y-4">
         <template x-for="request in pendingRequests" :key="request.id">
           <div class="bg-gray-800 rounded-lg p-6 border-l-4 border-yellow-500">
             <div class="flex items-start justify-between mb-4">
@@ -268,6 +300,10 @@
         pendingRequests: [],
         recentActivity: JSON.parse(localStorage.getItem('recentActivity') || '[]'),
         copiedFlag: false,
+        scanningQR: false,
+        qrScanError: '',
+        qrVideoStream: null,
+        qrScanInterval: null,
 
         init() {
           let offerChangeInProgress = false;
@@ -397,6 +433,8 @@
         },
 
         disconnect() {
+          // Stop QR scanning if active
+          this.stopQRScan();
           if (this.peerConnection) {
             try {
               this.peerConnection.close();
@@ -561,6 +599,74 @@
           this.recentActivity.unshift(activity);
           this.recentActivity = this.recentActivity.slice(0, 20); // Keep last 20
           localStorage.setItem('recentActivity', JSON.stringify(this.recentActivity));
+        },
+
+        // QR Scanning functions
+        async startQRScan() {
+          try {
+            this.qrScanError = '';
+            this.scanningQR = true;
+
+            // Request camera access
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: 'environment' } // Use back camera if available
+            });
+
+            this.qrVideoStream = stream;
+            const video = this.$refs.qrVideo;
+            video.srcObject = stream;
+
+            // Start scanning for QR codes
+            this.qrScanInterval = setInterval(() => {
+              this.scanQRCode();
+            }, 300); // Scan every 300ms
+
+          } catch (error) {
+            console.error('Error accessing camera:', error);
+            this.qrScanError = 'Unable to access camera. Please ensure camera permissions are granted.';
+            this.scanningQR = false;
+          }
+        },
+
+        stopQRScan() {
+          this.scanningQR = false;
+          this.qrScanError = '';
+
+          // Stop video stream
+          if (this.qrVideoStream) {
+            this.qrVideoStream.getTracks().forEach(track => track.stop());
+            this.qrVideoStream = null;
+          }
+
+          // Clear scanning interval
+          if (this.qrScanInterval) {
+            clearInterval(this.qrScanInterval);
+            this.qrScanInterval = null;
+          }
+        },
+
+        scanQRCode() {
+          const video = this.$refs.qrVideo;
+          const canvas = this.$refs.qrScanCanvas;
+
+          if (!video || !canvas || video.readyState !== video.HAVE_ENOUGH_DATA) {
+            return;
+          }
+
+          const context = canvas.getContext('2d');
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+          const code = window.jsQR(imageData.data, imageData.width, imageData.height);
+
+          if (code) {
+            // QR code detected!
+            this.offerInput = code.data;
+            this.stopQRScan();
+          }
         },
 
         // Crypto functions

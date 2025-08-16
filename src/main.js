@@ -6,6 +6,7 @@ import * as nip19 from 'nostr-tools/nip19';
 import * as nip04 from 'nostr-tools/nip04';
 import * as nip44 from 'nostr-tools/nip44';
 import QRCode from 'qrcode';
+import jsQR from 'jsqr';
 
 // Make Alpine available globally for debugging
 window.Alpine = Alpine;
@@ -16,6 +17,7 @@ window.NostrTools = {
   nip44,
 };
 window.QRCode = QRCode;
+window.jsQR = jsQR;
 
 window.appVersion = import.meta.env.VITE_APP_VERSION;
 
